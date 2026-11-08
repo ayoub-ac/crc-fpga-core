@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later OR Commercial
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Parametric CRC update core. Computes the next CRC register value from
 // a current CRC register and an input byte by unrolling the bit-serial

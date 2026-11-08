@@ -1,4 +1,4 @@
--- SPDX-License-Identifier: GPL-3.0-or-later OR Commercial
+-- SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 --
 -- VHDL-2008 entity wrapping crc_top for VHDL-only design hierarchies.
 -- The architecture is a black-box component; the SystemVerilog core lives

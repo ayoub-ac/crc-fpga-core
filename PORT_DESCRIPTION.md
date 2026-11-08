@@ -101,9 +101,10 @@ Byte order inside `word_i` depends on `REFIN`:
 
 The byte-mode and word-mode interfaces share the same FSM and the
 same finalisation path; results are identical for the same byte
-sequence regardless of which interface delivered it. The testbench
-verifies this equivalence on all edge-case lengths and on every
-tenth random vector.
+sequence regardless of which interface delivered it (intended; not
+verified). The testbench is intended to check this equivalence on all
+edge-case lengths and on every tenth random vector; results not
+independently confirmed.
 
 ## Output handshake
 
@@ -130,7 +131,7 @@ next `init_i`.
 
 ## Latency summary
 
-For a message of N bytes:
+For a message of N bytes (intended cycle counts; not verified):
 
 | Phase                  | Cycles                          |
 |------------------------|---------------------------------|
@@ -140,6 +141,6 @@ For a message of N bytes:
 | Total                  | `3 + N` cycles (byte mode)      |
 | Total                  | `3 + ceil(N / 4)` (word mode)   |
 
-At 100 MHz, byte-mode throughput is ~100 MB/s per core; word-mode
-lifts that to ~400 MB/s (3.2 Gb/s, enough for line-rate Gigabit
-Ethernet FCS at 200 MHz).
+At 100 MHz, byte-mode throughput would be ~100 MB/s per core and
+word-mode ~400 MB/s, or 3.2 Gb/s, which would be enough for line-rate
+Gigabit Ethernet FCS at 200 MHz (unverified estimates).

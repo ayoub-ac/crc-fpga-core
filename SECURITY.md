@@ -31,24 +31,26 @@ you need to detect **adversaries**, use a cryptographic MAC
 (HMAC-SHA-256, BLAKE2-MAC, KMAC, or AES-GMAC). They are not
 interchangeable.
 
-## What this core promises
+## What this core is intended to provide
 
-1. **Correct per-RFC standard outputs.** Five named standards are
-   directly verified against Python `crcmod`:
+1. **Correct per-RFC standard outputs (intended; not verified).** Five
+   named standards are intended to match Python `crcmod`; tests are
+   included, results not independently confirmed:
    - CRC-32 (Ethernet, ZIP, gzip),
    - CRC-32C (iSCSI, SCTP, Btrfs, ext4 metadata),
    - CRC-16-CCITT (X.25, PPP, HDLC),
    - CRC-16-IBM (Modbus RTU),
    - CRC-8 (CAN, NRSC-5, SAE J1850).
-2. **Determinism.** Same input bytes, same polynomial / init / refin
+2. **Determinism (intended; not verified).** Same input bytes, same polynomial / init / refin
    / refout / xorout parameters → same CRC, every time, on every
    target. No race conditions, no clock-domain crossings inside the
    core (the core is single-clock).
-3. **Bit-exact match with software.** The core agrees byte-for-byte
-   with `crcmod.predefined`, `zlib.crc32`, `binascii.crc_hqx`, the
-   Linux kernel `crc32_le` / `crc32c_le`, and the Modbus reference
-   implementation.
-4. **No undefined values on any port.** All outputs are registered;
+3. **Match with software (intended; not verified).** The core is
+   intended to agree byte-for-byte with `crcmod.predefined`; the
+   testbench only compares against `crcmod`. Agreement with other
+   software implementations has not been checked.
+4. **No undefined values on any port (intended; not verified).** All
+   outputs are intended to be registered;
    `crc_o` is only valid when `crc_valid_o = 1`. `byte_count_o`
    monotonically increases over a session and resets on `init_i`.
 
@@ -80,6 +82,7 @@ If you find:
 - a synthesis-time elaboration failure on Yosys / Vivado / Quartus,
 
 open an issue at <https://github.com/ayoub-ac/crc-fpga-core/issues>
-with the input bytes, the parameter set, and the observed output. The
-testbench includes 100 random vectors per standard; fresh
-counter-examples are welcome.
+with the input bytes, the parameter set, and the observed output (do
+not include confidential details). No support or maintenance is
+provided. The testbench includes 100 random vectors per standard;
+fresh counter-examples are welcome.

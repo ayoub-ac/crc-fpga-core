@@ -2,8 +2,8 @@
 
 `crc_top_vhdl.vhd` is a thin VHDL-2008 entity that instantiates the
 SystemVerilog `crc_top` core as a black-box component. Mixed-language
-simulation and synthesis is supported by Vivado xsim, ModelSim, Questa,
-and Riviera-PRO out of the box; the open-source GHDL+Verilator co-sim
+simulation and synthesis is intended to work with Vivado xsim, ModelSim,
+Questa, and Riviera-PRO (not verified); the open-source GHDL+Verilator co-sim
 (see `make vhdl-test`) checks only that the wrapper compiles.
 
 ## Use from a VHDL design
@@ -42,6 +42,6 @@ u_crc : entity work.crc_top_vhdl
 ```
 
 Add both `rtl/crc_core.sv` and `rtl/crc_top.sv` to the same compilation
-library as the VHDL wrapper. Vivado / Quartus / Diamond / Radiant pick
-up the SystemVerilog files automatically when configured for
-mixed-language projects.
+library as the VHDL wrapper. Vivado / Quartus / Diamond / Radiant are
+intended to pick up the SystemVerilog files when configured for
+mixed-language projects (not verified).

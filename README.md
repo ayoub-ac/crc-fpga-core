@@ -1,20 +1,22 @@
 # crc-fpga-core
 
-[![License: GPL-3.0-or-later or commercial](https://img.shields.io/badge/license-GPL--3.0%20%7C%20commercial-blue.svg)](LICENSE.md)
-[![Tests](https://img.shields.io/badge/tests-passing-brightgreen.svg)](#verification)
-[![Lint](https://img.shields.io/badge/Verilator%20lint-clean-brightgreen.svg)](#build--test)
+[![License: GPL-3.0 | commercial](https://img.shields.io/badge/license-GPL--3.0%20%7C%20commercial-blue.svg)](LICENSE.md)
+
+> **Status: experimental and unverified.** This core was written with AI assistance and has not been independently verified in simulation regressions, formal proofs or hardware. Claims in this repository about protocol compliance, test results, timing and resource use are unverified. Do not use it in production or safety-critical designs without your own verification. No support or maintenance is provided.
 
 A small, parametric, synthesisable CRC engine in SystemVerilog. One
 core covers CRC-8, CRC-16, CRC-32 with arbitrary polynomial, init,
 input/output bit reflection, and final XOR. Five named standards are
-directly verified: CRC-32 (Ethernet, ZIP, gzip), CRC-32C (iSCSI,
+targeted (not independently verified): CRC-32 (Ethernet, ZIP, gzip), CRC-32C (iSCSI,
 SCTP, Btrfs, ext4 metadata), CRC-16-CCITT (X.25, PPP, HDLC),
-CRC-16-IBM (Modbus RTU), CRC-8 (CAN, NRSC-5, SAE J1850). Targets
-iCE40, ECP5, Xilinx 7-series, Cyclone V, Tang Nano 9K.
+CRC-16-IBM (Modbus RTU), CRC-8 (CAN, NRSC-5, SAE J1850). Intended
+targets: iCE40, ECP5, Xilinx 7-series, Cyclone V, Tang Nano 9K (not
+verified on hardware).
 
-Verified against Python `crcmod`: the RevEng catalogue check vector
-`123456789` for each named standard plus 100 random vectors per
-standard cross-checked end-to-end. No FPGA hardware required.
+The testbench is intended to check against Python `crcmod`: the RevEng
+catalogue check vector `123456789` for each named standard plus 100
+random vectors per standard. Tests are included; results not
+independently confirmed.
 
 ## What this is, and what it is not
 
@@ -28,7 +30,7 @@ ext4 metadata, JPEG, PNG, ZIP, gzip, BZIP2, ISO 9660, ...).
 This core is the datapath: feed it bytes, pulse `init_i` to start,
 pulse `byte_last_i` or `finalize_i` to finalise, read the CRC out.
 No tables in BRAM, no microcode — the byte-update kernel is a flat
-combinational XOR network of ~230 LUT4 on iCE40 (WIDTH=32).
+combinational XOR network (resource use not verified).
 
 ## Used in
 
@@ -45,7 +47,7 @@ combinational XOR network of ~230 LUT4 on iCE40 (WIDTH=32).
 ```bash
 git clone https://github.com/ayoub-ac/crc-fpga-core.git
 cd crc-fpga-core
-make lint test            # Verilator lint + 510 cross-validated checks
+make lint test            # Verilator lint + crcmod cross-checks (results not independently confirmed)
 make synth_report         # SYNTH_REPORT.md across iCE40/ECP5/Xilinx/Vivado/Quartus
 ```
 
@@ -64,16 +66,18 @@ Detailed handshake timing in [`PORT_DESCRIPTION.md`](PORT_DESCRIPTION.md).
 
 ## Headline numbers
 
-Real numbers from `make synth_report` (Yosys 0.33, default params:
-CRC-32 Ethernet, WIDTH=32, WORD_PARALLEL=0):
+Unverified estimates (see [`RESOURCE_ESTIMATES.md`](RESOURCE_ESTIMATES.md));
+run `make synth_report` for real numbers (default params: CRC-32
+Ethernet, WIDTH=32, WORD_PARALLEL=0):
 
-| Target           | LUT       | FF   | BRAM | Throughput          |
+| Target           | LUT       | FF (unverified estimate) | BRAM | Throughput (unverified estimate) |
 |------------------|-----------|------|------|---------------------|
 | iCE40 UP5K       | see `SYNTH_REPORT.md` | ~100 | 0 | 1 byte/cycle |
 | ECP5 LFE5UM-25   | see `SYNTH_REPORT.md` | ~100 | 0 | 1 byte/cycle |
 | Xilinx Artix-7   | see `SYNTH_REPORT.md` | ~200 | 0 | 1 byte/cycle |
 
-WORD_PARALLEL=1 lifts throughput to 4 bytes/cycle at ~3x LUT cost.
+WORD_PARALLEL=1 is intended to lift throughput to 4 bytes/cycle at
+roughly 3x LUT cost (unverified estimate).
 See [`RESOURCE_ESTIMATES.md`](RESOURCE_ESTIMATES.md).
 
 ## Build & test
@@ -83,9 +87,13 @@ make lint            # Verilator lint of crc_core + crc_top + tb
 make test            # build and run the test suite
 ```
 
-A passing run ends with `+PASS all tests passed` and exits 0.
+The testbench is written to end with `+PASS all tests passed` and exit
+0 on success. Tests are included; results not independently confirmed.
 
 ## Verification
+
+The tests below are included in `tb/`; their results have not been
+independently confirmed.
 
 ### Catalogue check vectors
 
@@ -100,8 +108,9 @@ A passing run ends with `+PASS all tests passed` and exits 0.
 ### Random cross-validation
 
 100 random inputs per standard (lengths 0..1024 bytes, including
-empty, single-byte, 4-byte boundary) verified against
-`crcmod.predefined` — 500 cross-validated checks per regression.
+empty, single-byte, 4-byte boundary) intended to be checked against
+`crcmod.predefined` (500 checks per run; results not independently
+confirmed).
 
 ### SystemVerilog assertions and coverage
 
@@ -109,7 +118,8 @@ empty, single-byte, 4-byte boundary) verified against
 byte-counter monotonicity, finalize-eventually-yields-output,
 no-byte-during-init. `tb/cov.sv` (12 bins): each WIDTH variant
 (8/16/32), REFIN on/off, XOROUT nonzero/zero, byte vs word ingest
-path, partial-word ingest. The regression fails below 100% bin hit.
+path, partial-word ingest. The testbench is intended to fail below
+100% bin hit; not verified.
 
 ### Synthesis comparison
 
@@ -119,11 +129,11 @@ Quartus are detected and skipped when not on `$PATH`.
 
 ## Variants
 
-| Variant                          | Use case                                          | Tier |
-|----------------------------------|---------------------------------------------------|------|
+| Variant                          | Use case                                          | License |
+|----------------------------------|---------------------------------------------------|---------|
 | `rtl/crc_top.sv`                 | Default top: byte streaming + 32-bit parallel    | GPL  |
 | `rtl/crc_core.sv`                | Per-byte combinational kernel only                | GPL  |
-| `vhdl_wrapper/crc_top_vhdl.vhd`  | VHDL-2008 entity for VHDL-only designs            | All  |
+| `vhdl_wrapper/crc_top_vhdl.vhd`  | VHDL-2008 entity for VHDL-only designs            | GPL  |
 
 ## License
 

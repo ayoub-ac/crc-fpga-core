@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later OR Commercial
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Functional coverage collector. Sticky bins set across the regression;
 // the C++ harness reads them via `verilator public` flat-RW to print a

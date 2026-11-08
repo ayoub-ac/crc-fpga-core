@@ -1,8 +1,10 @@
 # Resource estimates
 
-Numbers below are from Yosys 0.x generic synthesis (`make synth_report`).
-They are pre-place-and-route. See `SYNTH_REPORT.md` for the most recent
-run; this document explains what dominates the area and how to shrink
+> **Unverified estimates.** The figures in this file have not been confirmed by a recorded, reproducible synthesis run or by hardware measurement. Treat every LUT, FF, BRAM, DSP, Fmax, throughput, latency and power figure here as an unverified estimate. Run `make synth_report` with your own toolchain to get real numbers.
+
+Numbers below are unverified estimates, intended to correspond to Yosys
+generic synthesis (`make synth_report`), pre-place-and-route. See
+`SYNTH_REPORT.md`; this document explains what dominates the area and how to shrink
 or extend it.
 
 ## Summary (post-Yosys, pre-PnR)
@@ -13,11 +15,10 @@ or extend it.
 | Lattice ECP5 LFE5UM-25         | LUT4 dominates the byte-update kernel. nextpnr-ecp5 packs tighter than the Yosys-generic estimate; vendor (Diamond) tighter still. |
 | Xilinx Artix-7 XC7A35T         | Yosys-generic synthesis here counts LUT6 + CARRY4. Vivado synth_design typically maps the per-byte XOR to a single LUT6 layer. |
 | Cyclone V 5CSEMA5F31C6         | Quartus packs the byte-update XOR network into ALMs efficiently; ALM count is typically lower than the Yosys soft estimate. |
-| Gowin GW1NR-9 (Tang Nano 9K)   | Not characterised here. Gowin's vendor flow handles the design without issue. |
+| Gowin GW1NR-9 (Tang Nano 9K)   | Not characterised here. Not verified with Gowin's vendor flow. |
 
 For exact LUT/FF/BRAM numbers run `make synth_report` and read
-`SYNTH_REPORT.md`. The synthesis-comparison report is regenerated on
-every CI build.
+`SYNTH_REPORT.md`. No CI regenerates the synthesis-comparison report.
 
 ## What dominates the area
 
@@ -48,25 +49,29 @@ the byte-update kernel.
   This removes four `crc_core` instances (~3x LUT reduction).
 - **Tie `byte_count_o` off** if the consumer doesn't need it. The
   32-bit counter accounts for ~30% of the FFs.
-- **Single-bit-serial mode** (Premium): replace the unrolled 8-step
+- **Single-bit-serial mode** (not included): replace the unrolled 8-step
   byte kernel with a 1-step bit kernel and feed bits one at a time.
-  Cuts area by ~8x at the cost of 8x latency per byte. Useful for
+  Expected to cut area by roughly 8x at the cost of 8x latency per
+  byte (unverified estimate). Useful for
   ultra-tiny iCE40 LP1K projects.
 
 ## What you can do to push throughput
 
 - **`WORD_PARALLEL = 1`**: ingest 32 bits per cycle. ~3x the LUT
-  cost but 4x throughput. Already in the default tier.
-- **64-bit / 128-bit parallel** (Premium): chain 8 or 16 byte
+  cost but 4x throughput (unverified estimate). Included in this
+  repository.
+- **64-bit / 128-bit parallel** (not included): chain 8 or 16 byte
   kernels combinationally. Useful for 10G / 25G / 100G Ethernet FCS.
   Linearly scales LUT cost.
-- **Pipelined kernel** (Premium): split the 8-step bit-serial
+- **Pipelined kernel** (not included): split the 8-step bit-serial
   unroll into a pipelined version where each pipeline stage holds
   one bit-step. Allows higher Fmax on deep targets at no
   steady-state throughput cost. Useful when the design's critical
   path is the CRC kernel.
 
 ## Frequency
+
+All figures below are unverified estimates; no timing run backs them.
 
 - iCE40 UP5K, default toolchain (Yosys + nextpnr), no constraints:
   ~80-100 MHz typical for the WIDTH=32 byte-mode core.
@@ -84,7 +89,7 @@ demands both throughput and high Fmax.
 
 ## Power
 
-Ballpark: 2-5 mW dynamic on iCE40 UP5K at 50 MHz, depending on
+Unverified estimate: 2-5 mW dynamic on iCE40 UP5K at 50 MHz, depending on
 data activity. The CRC register toggles ~32 FFs per byte; the
 byte counter toggles a few FFs per byte; the rest is the FSM. The
 core is significantly cheaper than a full AES round in both area

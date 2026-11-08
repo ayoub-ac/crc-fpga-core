@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-3.0-or-later OR Commercial
+// SPDX-License-Identifier: GPL-3.0-or-later OR LicenseRef-Commercial
 //
 // Parametric CRC engine top: byte-streaming + optional 32-bit-parallel
 // fast path, REFOUT, XOROUT, and a finalize / coherent-output handshake.
